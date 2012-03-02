@@ -64,8 +64,10 @@ fun s:ProcessFile(file, ft, ...)
             \  : MakeSnip(a:ft, keyword, text)
 endf
 
-fun! ExtractSnipsFile(file, ft)
+let g:did_sp = {}
+fun! ExtractSnipsFile(dir, file, ft)
     if !filereadable(a:file) | return | endif
+    if (has_key(g:did_sp, a:ft) && has_key(g:did_sp[a:ft], a:file)) | return | endif
     let text = readfile(a:file)
     let inSnip = 0
     for line in text + ["\n"]
@@ -87,14 +89,22 @@ fun! ExtractSnipsFile(file, ft)
                 let trigger = strpart(trigger, 0, space - 1)
             endif
             let content = ''
+        elseif line[:6] == 'include'
+            let includeSnips = split(strpart(line, 8))
+            for incSnip in includeSnips
+                let includeSnip = substitute(incSnip, '^\s*\(.\{-}\)\s*$', '\1', '')
+                call s:DefineSnips(a:dir, includeSnip, a:ft)
+            endfor
         endif
     endfor
+    if !has_key(g:did_sp, a:ft) | let g:did_sp[a:ft] = {} | endif
+    let g:did_sp[a:ft][a:file] = 1
 endf
 
 " Reset snippets for filetype.
 fun! ResetSnippets(ft)
     let ft = a:ft == '' ? '_' : a:ft
-    for dict in [s:snippets, s:multi_snips, g:did_ft]
+    for dict in [s:snippets, s:multi_snips, g:did_ft, g:did_sp]
         if has_key(dict, ft)
             unlet dict[ft]
         endif
@@ -103,7 +113,7 @@ endf
 
 " Reset snippets for all filetypes.
 fun! ResetAllSnippets()
-    let s:snippets = {} | let s:multi_snips = {} | let g:did_ft = {}
+    let s:snippets = {} | let s:multi_snips = {} | let g:did_ft = {} | let g:did_sp = {}
 endf
 
 " Reload snippets for filetype.
@@ -142,7 +152,7 @@ fun s:DefineSnips(dir, aliasft, realft)
     endfor
     for path in split(globpath(a:dir, a:aliasft.'.snippets')."\n".
                     \ globpath(a:dir, a:aliasft.'-*.snippets'), "\n")
-        call ExtractSnipsFile(path, a:realft)
+        call ExtractSnipsFile(a:dir, path, a:realft)
     endfor
 endf
 
@@ -163,19 +173,36 @@ fun! TriggerSnippet()
         call feedkeys("\<tab>") | return ''
     endif
 
-    if exists('g:snipPos') | return snipMate#jumpTabStop(0) | endif
 
     let word = matchstr(getline('.'), '\S\+\%'.col('.').'c')
-    for scope in [bufnr('%')] + split(&ft, '\.') + ['_']
-        let [trigger, snippet] = s:GetSnippet(word, scope)
-        " If word is a trigger for a snippet, delete the trigger & expand
-        " the snippet.
-        if snippet != ''
-            let col = col('.') - len(trigger)
-            sil exe 's/\V'.escape(trigger, '/\.').'\%#//'
-            return snipMate#expandSnip(snippet, col)
-        endif
-    endfor
+    " we only get the snippet if the word is not the word before the $i or name
+    " in ${i:name}
+    if !(exists('g:snipPos') && exists('g:snipCurPos') && (g:snipPos[g:snipCurPos][3][0] == word || g:snipPos[g:snipCurPos][3][1] == word))
+        for scope in [bufnr('%')] + split(&ft, '\.') + ['_']
+            let [trigger, snippet] = s:GetSnippet(word, scope)
+            " If word is a trigger for a snippet, delete the trigger & expand
+            " the snippet.
+            if snippet != ''
+                " we only expand the trigger if it is not the word before the $i or name
+                " in ${i:name}
+                if exists('g:snipPos') && exists('g:snipCurPos')
+                    if g:snipPos[g:snipCurPos][3][1] == trigger
+                        continue
+                    endif
+                    let [drop_trigger, drop_snippet] = s:GetSnippet(g:snipPos[g:snipCurPos][3][0], scope)
+                    if drop_trigger == trigger
+                        continue
+                    endif
+                endif
+
+                let col = col('.') - len(trigger)
+                sil exe 's/\V'.escape(trigger, '/\.').'\%#//'
+                return snipMate#expandSnip(snippet, col)
+            endif
+        endfor
+    endif
+
+    if exists('g:snipPos') | return snipMate#jumpTabStop(0) | endif
 
     if exists('SuperTabKey')
         call feedkeys(SuperTabKey)
