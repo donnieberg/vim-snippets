@@ -34,8 +34,7 @@ snippet #if
 	#endif
 # Header Include-Guard
 snippet once
-	#ifndef ${1:`toupper(Filename('$1_H', 'UNTITLED_H'))`}
-
+	#ifndef ${1:`substitute(toupper(Filename('__$1_H__', '__UNTITLED_H__')), '-', '_', 'g')`}
 	#define $1
 
 	${2}
@@ -65,13 +64,13 @@ snippet wh
 	}
 # For Loop
 snippet for
-	for (${2:i} = 0; $2 < ${1:count}; $2${3:++}) {
+	for (${2:i} = 0; $2 < ${1:count}; ${3:++}$2) {
 		${4:/* code */}
 	}
 # Custom For Loop
 snippet forr
-	for (${1:i} = ${2:0}; ${3:$1 < 10}; $1${4:++}) {
-		${5:/* code */}
+	for (${1:i} = ${2:0}; $1 ${3:<} ${4:count}; ${5:++}$1) {
+		${6:/* code */}
 	}
 # Function
 snippet fun
@@ -111,3 +110,38 @@ snippet fpr
 # This is kind of convenient
 snippet .
 	[${1}]${2}
+# gobject utility macros
+snippet macros
+	#define ${1:`GObjectNS()`}_TYPE_${2:`GObjectMO()`}             \
+		(${3:`GObjectNsm()`}_get_type())
+	#define $1_$2(obj)             \
+		(G_TYPE_CHECK_INSTANCE_CAST ((obj), $1_TYPE_$2, ${4:`GObjectNs()`}${5:`GObjectMo()`}))
+	#define $1_$2_CLASS(klass)     \
+		(G_TYPE_CHECK_CLASS_CAST ((klass), $1_TYPE_$2, $4$5Class))
+	#define $1_IS_$2(obj)          \
+		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), $1_TYPE_$2))
+	#define $1_IS_$2_CLASS(klass)  \
+		(G_TYPE_CHECK_CLASS_TYPE ((klass), $1_TYPE_$2))
+	#define $1_$2_GET_CLASS(obj)   \
+		(G_TYPE_INSTANCE_GET_CLASS ((obj), $1_TYPE_$2, $4$5Class))
+	
+	G_BEGIN_DECLS
+
+	typedef struct {
+		GObject parent_instance;
+
+		/* instance members */${6}
+	} $4$5;
+
+	typedef struct {
+		GObjectClass parent_class;
+		/* class members*/${7}
+	} $4$5Class;
+
+	G_DEFINE_TYPE ($4$5, $3, G_TYPE_OBJECT)
+
+	GType				$3_get_type		(void);
+	$4$5		*$3_new			(void);
+	
+	
+	G_END_DECLS

@@ -3,20 +3,28 @@ snippet main
 	{
 		${1:/* code */}
 	}
+snippet bo
+	boolean 
 snippet pu
-	public
+	public 
 snippet po
-	protected
+	protected 
+snippet pa
+	package 
 snippet pr
-	private
+	private 
 snippet st
-	static
+	static 
 snippet fi
-	final
+	final 
+snippet fl
+	float 
 snippet ab
-	abstract
+	abstract 
 snippet re
 	return
+snippet su
+	super.
 snippet br
 	break;
 snippet de
@@ -29,9 +37,9 @@ snippet th
 snippet sy
 	synchronized
 snippet im
-	import
+	import 
 snippet imp
-	implements
+	implements 
 snippet ext
 	extends 
 snippet j.u
@@ -53,7 +61,9 @@ snippet elif
 snippet wh
 	while (${1}) ${2}
 snippet for
-	for (${1}; ${2}; ${3}) ${4}
+	for (${1}; ${2}; ${3}) {
+		${4}
+	}
 snippet fore
 	for (${1} : ${2}) ${3}
 snippet sw
@@ -61,7 +71,7 @@ snippet sw
 snippet cs
 	case ${1}:
 		${2}
-	${3}
+		break;
 snippet tc
 	public class ${1:`Filename()`} extends ${2:TestCase}
 snippet t
@@ -93,3 +103,9 @@ snippet tryf
 	}
 snippet rst
 	ResultSet ${1:rst}${2: = null}${3};${4}
+snippet @ov
+	@Override
+	${1}
+snippet setcolor
+	setColor(getResources().getColor(R.color.${1:the_color}));
+	${2}

@@ -1,3 +1,6 @@
+# Alert
+snippet alert
+	alert("${1:message}");
 # Prototype
 snippet proto
 	${1:class_name}.prototype.${2:method_name} =
@@ -49,6 +52,11 @@ snippet forr
 		${4:$1[$2]}
 	};
 # while (...) {...}
+snippet forin
+	for (var ${1} in ${2}) {
+		${3}
+	}
+	${4}
 snippet wh
 	while (${1:/* condition */}) {
 		${2:/* code */}
