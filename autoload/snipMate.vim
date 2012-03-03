@@ -61,7 +61,7 @@ endf
 
 fun snipMate#expandSnip(snip, col)
     " if we expand in the last tabstop, we start a new round
-    if exists('g:snipPos') && g:snipCurPos == s:snipLen
+    if exists('g:snipPos') && g:snipCurPos == s:snipLen - 1
         call s:RemoveSnippet()
     endif
     let lnum = line('.') | let col = a:col
@@ -147,10 +147,6 @@ fun snipMate#expandSnip(snip, col)
         call s:RemoveSnippet()
         " Place cursor at end of snippet if no tab stop is given
         let newlines = len(snipLines) - 1
-        let g:indent = indent
-        let g:lens = len(snipLines[-1])
-        let g:lena = len(afterCursor)
-        let g:tcol = col
         call cursor(lnum + newlines, len(snipLines[-1]) - len(afterCursor)
                     \ + (newlines ? indent : col))
     endif
