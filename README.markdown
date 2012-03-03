@@ -5,7 +5,7 @@ merge the pull request of msanders/snipmate.vim
 
 Quickly install with:
 
-    git clone git://github.com/acevery/snipmate.vim.git
-	cd snipmate.vim
+    git clone git://github.com/acevery/vim-snipmate-plus.git
+	cd vim-snipmate-plus
 	cp -R * ~/.vim
 
