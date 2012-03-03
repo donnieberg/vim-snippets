@@ -98,6 +98,11 @@ snippet docxt
 snippet docx
 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+# for most tags
+snippet id
+	id="${1}"${2}
+snippet cl
+	class="${1}"${2}
 snippet html
 	<html>
 	${1}
@@ -136,14 +141,14 @@ snippet base
 snippet r
 	<br`Close()[1:]`>
 snippet p
-	<p>${1}</p>
+	<p${1}>${2}</p>
 snippet pre
 	<pre${1}>${2}</pre>
 snippet span
 	<span${1}>${2}</span>
 snippet div
-	<div id="${1:name}">
-		${2}
+	<div id="${1:name}"${2}>
+		${3}
 	</div><!-- #$1 -->
 snippet ol
 	<ol${1}>
@@ -154,7 +159,7 @@ snippet ul
 		<li${2}>${3}</li>
 	</ul>
 snippet li
-	<li>${1}</li>
+	<li${1}>${2}</li>
 # Embed QT Movie
 snippet movie
 	<object width="$2" height="$3" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"
@@ -241,12 +246,8 @@ snippet footer
 	<footer>
 		${1}
 	</footer>
-snippet section section id
-	<section id="${1:id}">
-		${2}
-	</section><!-- #$1 -->
-snippet section section
-	<section>${1}</section>
+snippet section
+	<section${1}>${2}</section>
 snippet hgroup
 	<hgroup>
 		<h1>${1}</h1>

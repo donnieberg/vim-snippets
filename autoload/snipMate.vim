@@ -50,8 +50,8 @@ endf
 fun s:RemoveSnippet()
     unl! g:snipPos g:snipCurPos s:snipLen s:endCol s:endLine s:prevLen
          \ s:lastBuf s:oldWord
-    if exists('s:update')
-        unl s:startCol s:origWordLen s:update
+    if exists('g:snipUpdate')
+        unl s:startCol s:origWordLen g:snipUpdate
         if exists('s:oldVars') | unl s:oldVars s:oldEndCol | endif
     endif
     aug! snipMateAutocmds
@@ -212,17 +212,16 @@ fun s:BuildTabStops(snip, lnum, col, indent)
         " need to recover the true index in vim list
         let j = i - 1
         " ['word before $','the name in ${1:name}']
-        call add(snipPos, [0, 0, -1, ['','']])
+        call add(snipPos, [0, 0, -1, ''])
 
         let snipPos[j][0] = a:lnum + s:Count(beforeTabStop, "\n")
         let snipPos[j][1] = a:indent + len(matchstr(withoutOthers, '.*\(\n\|^\)\zs.*\ze${'.i.'\D'))
-        let snipPos[j][3][0] = matchstr(beforeTabStop, '\S\+$')
+        let snipPos[j][3] = matchstr(beforeTabStop, '\S\+$')
         if snipPos[j][0] == a:lnum | let snipPos[j][1] += a:col | endif
 
         " Get all $# matches in another list, if ${#:name} is given
         if stridx(withoutVars, '${'.i.':') != -1
             let snipPos[j][2] = len(matchstr(withoutVars, '${'.i.':\zs.\{-}\ze}'))
-            let snipPos[j][3][1] = matchstr(withoutVars, '${'.i.':\zs.\{-}\ze}')
             let dots = repeat('.', snipPos[j][2])
             call add(snipPos[j], [])
             " here only the placeholder $i left
@@ -249,7 +248,7 @@ fun snipMate#jumpTabStop(backwards)
         let startPlaceholder = s:oldEndCol + 1
     endif
 
-    if exists('s:update')
+    if exists('g:snipUpdate')
         call s:UpdatePlaceholderTabStops()
     else
         call s:UpdateTabStops()
@@ -286,7 +285,7 @@ endf
 
 fun s:UpdatePlaceholderTabStops()
     let changeLen = s:origWordLen - g:snipPos[g:snipCurPos][2]
-    unl s:startCol s:origWordLen s:update
+    unl s:startCol s:origWordLen g:snipUpdate
     if !exists('s:oldVars') | return | endif
     " Update tab stops in snippet if text has been added via "$#"
     " (e.g., in "${1:foo}bar$1${2}").
@@ -381,7 +380,7 @@ fun s:SelectWord()
                 \ s:origWordLen)
     let s:prevLen[1] -= s:origWordLen
     if !empty(g:snipPos[g:snipCurPos][4])
-        let s:update = 1
+        let g:snipUpdate = 1
         let s:endCol = -1
         let s:startCol = g:snipPos[g:snipCurPos][1] - 1
     endif
@@ -405,7 +404,7 @@ endf
 fun s:UpdateChangedSnip(entering)
     if exists('g:snipPos') && bufnr(0) != s:lastBuf
         call s:RemoveSnippet()
-    elseif exists('s:update') " If modifying a placeholder
+    elseif exists('g:snipUpdate') " If modifying a placeholder
         if !exists('s:oldVars') && g:snipCurPos + 1 < s:snipLen
             " Save the old snippet & word length before it's updated
             " s:startCol must be saved too, in case text is added
@@ -426,7 +425,7 @@ fun s:UpdateChangedSnip(entering)
         " If the cursor moves outside the snippet, quit it
         if line('.') != g:snipPos[g:snipCurPos][0] || col < s:startCol ||
                     \ col - 1 > s:endCol
-            unl! s:startCol s:origWordLen s:oldVars s:update
+            unl! s:startCol s:origWordLen s:oldVars g:snipUpdate
             return s:RemoveSnippet()
         endif
 

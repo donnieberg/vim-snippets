@@ -177,7 +177,7 @@ fun! TriggerSnippet()
     let word = matchstr(getline('.'), '\S\+\%'.col('.').'c')
     " we only get the snippet if the word is not the word before the $i or name
     " in ${i:name}
-    if !(exists('g:snipPos') && exists('g:snipCurPos') && (g:snipPos[g:snipCurPos][3][0] == word || g:snipPos[g:snipCurPos][3][1] == word))
+    if !((exists('g:snipUpdate') && g:snipUpdate == 1) || (exists('g:snipPos') && exists('g:snipCurPos') && (g:snipPos[g:snipCurPos][3] == word)))
         for scope in [bufnr('%')] + split(&ft, '\.') + ['_']
             let [trigger, snippet] = s:GetSnippet(word, scope)
             " If word is a trigger for a snippet, delete the trigger & expand
@@ -186,10 +186,7 @@ fun! TriggerSnippet()
                 " we only expand the trigger if it is not the word before the $i or name
                 " in ${i:name}
                 if exists('g:snipPos') && exists('g:snipCurPos')
-                    if g:snipPos[g:snipCurPos][3][1] == trigger
-                        continue
-                    endif
-                    let [drop_trigger, drop_snippet] = s:GetSnippet(g:snipPos[g:snipCurPos][3][0], scope)
+                    let [drop_trigger, drop_snippet] = s:GetSnippet(g:snipPos[g:snipCurPos][3], scope)
                     if drop_trigger == trigger
                         continue
                     endif
