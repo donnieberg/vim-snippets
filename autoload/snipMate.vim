@@ -54,10 +54,16 @@ fun s:RemoveSnippet()
         unl s:startCol s:origWordLen g:snipUpdate
         if exists('s:oldVars') | unl s:oldVars s:oldEndCol | endif
     endif
-    aug! snipMateAutocmds
+    if exists('snipMateAutocmds')
+        aug! snipMateAutocmds
+    endif
 endf
 
 fun snipMate#expandSnip(snip, col)
+    " if we expand in the last tabstop, we start a new round
+    if exists('g:snipPos') && g:snipCurPos == s:snipLen
+        call s:RemoveSnippet()
+    endif
     let lnum = line('.') | let col = a:col
     let snippet = s:ProcessSnippet(a:snip)
     " Avoid error if eval evaluates to nothing
@@ -122,7 +128,7 @@ fun snipMate#expandSnip(snip, col)
 
     let s:snipLen += l:snipLen
 
-    if s:snipLen
+    if l:snipLen
         aug snipMateAutocmds
             au CursorMovedI * call s:UpdateChangedSnip(0)
             au InsertEnter * call s:UpdateChangedSnip(1)
@@ -138,11 +144,15 @@ fun snipMate#expandSnip(snip, col)
         let s:prevLen = [line('$'), col('$')]
         if g:snipPos[g:snipCurPos][2] != -1 | return s:SelectWord() | endif
     else
-        unl g:snipPos s:snipLen
+        call s:RemoveSnippet()
         " Place cursor at end of snippet if no tab stop is given
         let newlines = len(snipLines) - 1
-        call cursor(lnum + newlines, indent + len(snipLines[-1]) - len(afterCursor)
-                    \ + (newlines ? 0: col - 1))
+        let g:indent = indent
+        let g:lens = len(snipLines[-1])
+        let g:lena = len(afterCursor)
+        let g:tcol = col
+        call cursor(lnum + newlines, len(snipLines[-1]) - len(afterCursor)
+                    \ + (newlines ? indent : col))
     endif
     return ''
 endf
@@ -353,7 +363,6 @@ fun s:UpdateTabStops()
     " Update the line number of all proceeding tab stops if <cr> has
     " been inserted.
     if changeLine != 0
-        let changeLine -= 1
         for pos in g:snipPos
             if pos[0] >= lnum
                 if pos[0] == lnum | let pos[1] += changeCol | endif
@@ -458,6 +467,7 @@ fun s:UpdateChangedSnip(entering)
         if changeLine != 0
             let g:endLine += changeLine
             let g:endCol = col
+            let s:prevLen = [line('$'), col('$')]
         endif
 
         " Delete snippet if cursor moves out of it in insert mode
