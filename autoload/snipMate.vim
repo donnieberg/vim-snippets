@@ -466,11 +466,14 @@ fun s:UpdateChangedSnip(entering)
             let s:prevLen = [line('$'), col('$')]
         endif
 
-        " Delete snippet if cursor moves out of it in insert mode
-        "if (lnum == g:endLine && (col > g:endCol || col < g:snipPos[g:snipCurPos][1]))
-        "    \ || lnum > g:endLine || lnum < g:snipPos[g:snipCurPos][0]
-        "    call s:RemoveSnippet()
-        "endif
+        " Delete snippet if cursor moves out of it in insert mode in the last
+        " tabstop
+        if g:snipCurPos == s:snipLen -1
+            if (lnum == g:endLine && (col > g:endCol || col < g:snipPos[g:snipCurPos][1]))
+                \ || lnum > g:endLine || lnum < g:snipPos[g:snipCurPos][0]
+                call s:RemoveSnippet()
+            endif
+        endif
     endif
 endf
 
