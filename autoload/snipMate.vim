@@ -48,7 +48,7 @@ fun! GObjectNsm()
 endf
 
 fun s:RemoveSnippet()
-    unl! g:snipPos g:snipCurPos s:snipLen s:endCol s:endLine s:prevLen
+    unl! g:snipPos g:snipCurPos s:snipLen g:endCol g:endLine s:prevLen
          \ s:lastBuf s:oldWord
     if exists('g:snipUpdate')
         unl s:startCol s:origWordLen g:snipUpdate
@@ -59,14 +59,17 @@ endf
 
 fun snipMate#expandSnip(snip, col)
     let lnum = line('.') | let col = a:col
-
     let snippet = s:ProcessSnippet(a:snip)
     " Avoid error if eval evaluates to nothing
     if snippet == '' | return '' | endif
 
     " Expand snippet onto current position with the tab stops removed
     let snipLines = split(substitute(snippet, '$\d\+\|${\d\+.\{-}}', '', 'g'), "\n", 1)
+    " We need to record the snippet lines and cols if we in multi level
+    " expanding
 
+    let addedLines = len(snipLines) - 1
+    let addedCols = len(snipLines[-1])
     let line = getline(lnum)
     let afterCursor = strpart(line, col - 1)
     " Keep text after the cursor
@@ -92,11 +95,19 @@ fun snipMate#expandSnip(snip, col)
 
     let [l:snipPos, l:snipLen] = s:BuildTabStops(snippet, lnum, col - indent, indent)
 
-    if  !exists('g:snipPos')
+    if !exists('g:snipPos')
         let g:snipPos = []
     elseif exists('g:snipCurPos') && len(g:snipPos) > g:snipCurPos
+        " In multi-level expansion, we need to update following tabstops
+        let g:endLine += addedLines
+        if len(snipLines) > 1
+            let addedCols += indent - 1
+        endif
+        let g:endCol += addedCols
+        call s:UpdateTabStops()
         call remove(g:snipPos, g:snipCurPos)
     endif
+
     if !exists('s:snipLen')
         let s:snipLen = 0
     elseif s:snipLen > 0
@@ -120,8 +131,8 @@ fun snipMate#expandSnip(snip, col)
         if !exists('g:snipCurPos')
             let g:snipCurPos = 0
         endif
-        let s:endCol = g:snipPos[g:snipCurPos][1]
-        let s:endLine = g:snipPos[g:snipCurPos][0]
+        let g:endCol = g:snipPos[g:snipCurPos][1]
+        let g:endLine = g:snipPos[g:snipCurPos][0]
 
         call cursor(g:snipPos[g:snipCurPos][0], g:snipPos[g:snipCurPos][1])
         let s:prevLen = [line('$'), col('$')]
@@ -269,15 +280,15 @@ fun snipMate#jumpTabStop(backwards)
     if g:snipCurPos < 0 | let g:snipCurPos = s:snipLen - 1 | endif
 
     if g:snipCurPos == s:snipLen
-        let sMode = s:endCol == g:snipPos[g:snipCurPos-1][1]+g:snipPos[g:snipCurPos-1][2]
+        let sMode = g:endCol == g:snipPos[g:snipCurPos-1][1]+g:snipPos[g:snipCurPos-1][2]
         call s:RemoveSnippet()
         return sMode ? "\<tab>" : TriggerSnippet()
     endif
 
     call cursor(g:snipPos[g:snipCurPos][0], g:snipPos[g:snipCurPos][1])
 
-    let s:endLine = g:snipPos[g:snipCurPos][0]
-    let s:endCol = g:snipPos[g:snipCurPos][1]
+    let g:endLine = g:snipPos[g:snipCurPos][0]
+    let g:endCol = g:snipPos[g:snipCurPos][1]
     let s:prevLen = [line('$'), col('$')]
 
     return g:snipPos[g:snipCurPos][2] == -1 ? '' : s:SelectWord()
@@ -327,12 +338,12 @@ fun s:UpdatePlaceholderTabStops()
             endfor
         endfor
     endif
-    unl s:endCol s:oldVars s:oldEndCol
+    unl g:endCol s:oldVars s:oldEndCol
 endf
 
 fun s:UpdateTabStops()
-    let changeLine = s:endLine - g:snipPos[g:snipCurPos][0]
-    let changeCol = s:endCol - g:snipPos[g:snipCurPos][1]
+    let changeLine = g:endLine - g:snipPos[g:snipCurPos][0]
+    let changeCol = g:endCol - g:snipPos[g:snipCurPos][1]
     if exists('s:origWordLen')
         let changeCol -= s:origWordLen
         unl s:origWordLen
@@ -381,7 +392,7 @@ fun s:SelectWord()
     let s:prevLen[1] -= s:origWordLen
     if !empty(g:snipPos[g:snipCurPos][4])
         let g:snipUpdate = 1
-        let s:endCol = -1
+        let g:endCol = -1
         let s:startCol = g:snipPos[g:snipCurPos][1] - 1
     endif
     if !s:origWordLen | return '' | endif
@@ -414,17 +425,17 @@ fun s:UpdateChangedSnip(entering)
         endif
         let col = col('.') - 1
 
-        if s:endCol != -1
+        if g:endCol != -1
             let changeLen = col('$') - s:prevLen[1]
-            let s:endCol += changeLen
+            let g:endCol += changeLen
         else " When being updated the first time, after leaving select mode
             if a:entering | return | endif
-            let s:endCol = col - 1
+            let g:endCol = col - 1
         endif
 
         " If the cursor moves outside the snippet, quit it
         if line('.') != g:snipPos[g:snipCurPos][0] || col < s:startCol ||
-                    \ col - 1 > s:endCol
+                    \ col - 1 > g:endCol
             unl! s:startCol s:origWordLen s:oldVars g:snipUpdate
             return s:RemoveSnippet()
         endif
@@ -440,27 +451,27 @@ fun s:UpdateChangedSnip(entering)
         let lnum = line('.')
         let changeLine = line('$') - s:prevLen[0]
 
-        if lnum == s:endLine
-            let s:endCol += col('$') - s:prevLen[1]
+        if lnum == g:endLine
+            let g:endCol += col('$') - s:prevLen[1]
             let s:prevLen = [line('$'), col('$')]
         endif
         if changeLine != 0
-            let s:endLine += changeLine
-            let s:endCol = col
+            let g:endLine += changeLine
+            let g:endCol = col
         endif
 
         " Delete snippet if cursor moves out of it in insert mode
-        if (lnum == s:endLine && (col > s:endCol || col < g:snipPos[g:snipCurPos][1]))
-            \ || lnum > s:endLine || lnum < g:snipPos[g:snipCurPos][0]
-            call s:RemoveSnippet()
-        endif
+        "if (lnum == g:endLine && (col > g:endCol || col < g:snipPos[g:snipCurPos][1]))
+        "    \ || lnum > g:endLine || lnum < g:snipPos[g:snipCurPos][0]
+        "    call s:RemoveSnippet()
+        "endif
     endif
 endf
 
 " This updates the variables in a snippet when a placeholder has been edited.
 " (e.g., each "$1" in "${1:foo} $1bar $1bar")
 fun s:UpdateVars()
-    let newWordLen = s:endCol - s:startCol + 1
+    let newWordLen = g:endCol - s:startCol + 1
     let newWord = strpart(getline('.'), s:startCol, newWordLen)
     if newWord == s:oldWord || empty(g:snipPos[g:snipCurPos][4])
         return
@@ -478,7 +489,7 @@ fun s:UpdateVars()
             let start = s:startCol
             if lnum == curLine && col <= start
                 let s:startCol -= changeLen
-                let s:endCol -= changeLen
+                let g:endCol -= changeLen
             endif
             for nPos in g:snipPos[g:snipCurPos][4][(i):]
                 " This list is in ascending order, so quit if we've gone too far.

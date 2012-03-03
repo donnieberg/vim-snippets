@@ -186,14 +186,17 @@ fun! TriggerSnippet()
                 " we only expand the trigger if it is not the word before the $i or name
                 " in ${i:name}
                 if exists('g:snipPos') && exists('g:snipCurPos')
-                    let [drop_trigger, drop_snippet] = s:GetSnippet(g:snipPos[g:snipCurPos][3], scope)
-                    if drop_trigger == trigger
+                    let [test_trigger, test_snippet] = s:GetSnippet(g:snipPos[g:snipCurPos][3], scope)
+                    if test_trigger == trigger
                         continue
                     endif
                 endif
 
                 let col = col('.') - len(trigger)
                 sil exe 's/\V'.escape(trigger, '/\.').'\%#//'
+                if exists('g:endCol')
+                    let g:endCol -= len(trigger)
+                endif
                 return snipMate#expandSnip(snippet, col)
             endif
         endfor
