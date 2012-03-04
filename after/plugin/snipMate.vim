@@ -11,7 +11,9 @@ let s:did_snips_mappings = 1
 " You can safely adjust these mappings to your preferences (as explained in
 " :help snipMate-remap).
 ino <silent> <tab> <c-r>=TriggerSnippet()<cr>
+ino <silent> <c-q> <c-r>=RemoveSnippet()<cr><ESC>
 snor <silent> <tab> <esc>i<right><c-r>=TriggerSnippet()<cr>
+snor <silent> <c-q> <esc>i<right><c-r>=RemoveSnippet()<cr><ESC>
 ino <silent> <s-tab> <c-r>=BackwardsSnippet()<cr>
 snor <silent> <s-tab> <esc>i<right><c-r>=BackwardsSnippet()<cr>
 ino <silent> <c-r><tab> <c-r>=ShowAvailableSnips()<cr>

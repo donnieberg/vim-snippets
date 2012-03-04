@@ -1,5 +1,5 @@
 # Why this #
-This my fork of msanders/snipmate.vim. I add the multiple level expansion, which I
+This my fork of msanders/snipmate.vim. I add the nested snippet expansion, which I
 badly need in writing html and xml. I also add more snippets I used and I try to
 merge the pull request of msanders/snipmate.vim
 

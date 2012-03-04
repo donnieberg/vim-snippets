@@ -47,7 +47,7 @@ fun! GObjectNsm()
     return 'namespace_module'
 endf
 
-fun s:RemoveSnippet()
+fun snipMate#removeSnippet()
     unl! g:snipmate_snipPos g:snipmate_snipCurPos s:snipLen g:snipmate_endCol g:snipmate_endLine s:prevLen
          \ s:lastBuf s:oldWord
     if exists('g:snipmate_snipUpdate')
@@ -62,7 +62,7 @@ endf
 fun snipMate#expandSnip(snip, col)
     " if we expand in the last tabstop, we start a new round
     if exists('g:snipmate_snipPos') && g:snipmate_snipCurPos == s:snipLen - 1
-        call s:RemoveSnippet()
+        call snipMate#removeSnippet()
     endif
     let lnum = line('.') | let col = a:col
     let snippet = s:ProcessSnippet(a:snip)
@@ -144,7 +144,7 @@ fun snipMate#expandSnip(snip, col)
         let s:prevLen = [line('$'), col('$')]
         if g:snipmate_snipPos[g:snipmate_snipCurPos][2] != -1 | return s:SelectWord() | endif
     else
-        call s:RemoveSnippet()
+        call snipMate#removeSnippet()
         " Place cursor at end of snippet if no tab stop is given
         let newlines = len(snipLines) - 1
         call cursor(lnum + newlines, len(snipLines[-1]) - len(afterCursor)
@@ -287,7 +287,7 @@ fun snipMate#jumpTabStop(backwards)
 
     if g:snipmate_snipCurPos == s:snipLen
         let sMode = g:snipmate_endCol == g:snipmate_snipPos[g:snipmate_snipCurPos-1][1]+g:snipmate_snipPos[g:snipmate_snipCurPos-1][2]
-        call s:RemoveSnippet()
+        call snipMate#removeSnippet()
         return sMode ? "\<tab>" : TriggerSnippet()
     endif
 
@@ -419,7 +419,7 @@ endf
 " while in insert mode.
 fun s:UpdateChangedSnip(entering)
     if exists('g:snipmate_snipPos') && bufnr(0) != s:lastBuf
-        call s:RemoveSnippet()
+        call snipMate#removeSnippet()
     elseif exists('g:snipmate_snipUpdate') " If modifying a placeholder
         if !exists('s:oldVars') && g:snipmate_snipCurPos + 1 < s:snipLen
             " Save the old snippet & word length before it's updated
@@ -442,7 +442,7 @@ fun s:UpdateChangedSnip(entering)
         if line('.') != g:snipmate_snipPos[g:snipmate_snipCurPos][0] || col < s:startCol ||
                     \ col - 1 > g:snipmate_endCol
             unl! s:startCol s:origWordLen s:oldVars g:snipmate_snipUpdate
-            return s:RemoveSnippet()
+            return snipMate#removeSnippet()
         endif
 
         call s:UpdateVars()
@@ -471,7 +471,7 @@ fun s:UpdateChangedSnip(entering)
         if g:snipmate_snipCurPos == s:snipLen -1
             if (lnum == g:snipmate_endLine && (col > g:snipmate_endCol || col < g:snipmate_snipPos[g:snipmate_snipCurPos][1]))
                 \ || lnum > g:snipmate_endLine || lnum < g:snipmate_snipPos[g:snipmate_snipCurPos][0]
-                call s:RemoveSnippet()
+                call snipMate#removeSnippet()
             endif
         endif
     endif

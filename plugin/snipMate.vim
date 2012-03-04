@@ -177,7 +177,7 @@ fun! TriggerSnippet()
     let word = matchstr(getline('.'), '\S\+\%'.col('.').'c')
     " we only get the snippet if the word is not the word before the $i or name
     " in ${i:name}
-    if !((exists('g:snipmate_snipUpdate') && g:snipmate_snipUpdate == 1) || (exists('g:snipmate_snipPos') && exists('g:snipmate_snipCurPos') && (g:snipmate_snipPos[g:snipmate_snipCurPos][3] == word)))
+    if !(exists('g:snipmate_snipPos') && exists('g:snipmate_snipCurPos') && (g:snipmate_snipPos[g:snipmate_snipCurPos][3] == word || len(g:snipmate_snipPos[g:snipmate_snipCurPos]) == 5))
         for scope in [bufnr('%')] + split(&ft, '\.') + ['_']
             let [trigger, snippet] = s:GetSnippet(word, scope)
             " If word is a trigger for a snippet, delete the trigger & expand
@@ -209,6 +209,10 @@ fun! TriggerSnippet()
         return ''
     endif
     return "\<tab>"
+endf
+fun! RemoveSnippet()
+    call snipMate#removeSnippet()
+    return ''
 endf
 
 fun! BackwardsSnippet()

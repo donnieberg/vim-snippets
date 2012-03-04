@@ -130,10 +130,14 @@ snippet script
 	</script>${2}
 snippet scriptsrc
 	<script src="${1}.js"></script>${2}
-snippet style
+snippet style global
 	<style type="text/css" media="${1:screen}">
 		${2}
 	</style>${3}
+snippet style scoped
+	<style scoped>
+		${1}
+	</style>
 snippet a
 	<a href="${1:href}"${2}>${3:$1}</a>
 snippet base
@@ -250,8 +254,8 @@ snippet section
 	<section${1}>${2}</section>
 snippet hgroup
 	<hgroup>
-		<h1>${1}</h1>
-		<h2>${2}</h2>
+		<h${1:1}>${2}</h1>
+		<h${3:2}>${4}</h2>
 	</hgroup>
 snippet figure
 	<figure${1}>
