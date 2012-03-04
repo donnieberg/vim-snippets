@@ -8,12 +8,17 @@ syn match snippet '^snippet.*' transparent contains=multiSnipText,snipKeyword
 syn match multiSnipText '\S\+ \zs.*' contained
 syn match snipKeyword '^snippet'me=s+8 contained
 syn match snipError "^[^#s\t].*$"
+syn match include '^include\s\+.*' transparent contains=includeFile,includeKeyword
+syn match includeFile '[^\s]\+' contained
+syn match includeKeyword '^include'me=s+8 contained
 
-hi link snipComment   Comment
-hi link multiSnipText String
-hi link snipKeyword   Keyword
-hi link snipComment   Comment
-hi link placeHolder   Special
-hi link tabStop       Special
-hi link snipCommand   String
-hi link snipError     Error
+hi link snipComment     Comment
+hi link multiSnipText   String
+hi link snipKeyword     Keyword
+hi link snipComment     Comment
+hi link placeHolder     Special
+hi link tabStop         Special
+hi link snipCommand     String
+hi link snipError       Error
+hi link includeKeyword  Keyword
+hi link includeFile     PreProc
