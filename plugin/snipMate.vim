@@ -187,8 +187,6 @@ fun! TriggerSnippet()
                 " in ${i:name}
                 if exists('g:snipmate_snipPos') && exists('g:snipmate_snipCurPos')
                     let [test_trigger, test_snippet] = s:GetSnippet(g:snipmate_snipPos[g:snipmate_snipCurPos][3], scope)
-                    let g:the_test_trigger = test_trigger
-                    let g:the_trigger = trigger
                     if test_trigger == trigger
                         continue
                     endif
