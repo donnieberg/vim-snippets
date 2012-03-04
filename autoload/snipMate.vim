@@ -221,6 +221,7 @@ fun s:BuildTabStops(snip, lnum, col, indent)
     while stridx(a:snip, '${'.i) != -1
         let beforeTabStop = matchstr(withoutVars, '^.*\ze${'.i.'\D')
         let withoutOthers = substitute(withoutVars, '${\('.i.'\D\)\@!\d\+.\{-}}', '', 'g')
+        let beforeWithoutOthers = substitute(beforeTabStop, '${\('.i.'\D\)\@!\d\+.\{-}}', '', 'g')
         " if we process {$1:aa}
         " now the beforeTabStop is the str before ${1
         " withoutOthers is the whole string without ${2:aa} and ${3} etc.
@@ -233,7 +234,7 @@ fun s:BuildTabStops(snip, lnum, col, indent)
 
         let snipPos[j][0] = a:lnum + s:Count(beforeTabStop, "\n")
         let snipPos[j][1] = a:indent + len(matchstr(withoutOthers, '.*\(\n\|^\)\zs.*\ze${'.i.'\D'))
-        let snipPos[j][3] = matchstr(beforeTabStop, '\S\+$')
+        let snipPos[j][3] = matchstr(beforeWithoutOthers, '\S\+$')
         if snipPos[j][0] == a:lnum | let snipPos[j][1] += a:col | endif
 
         " Get all $# matches in another list, if ${#:name} is given
@@ -286,9 +287,11 @@ fun snipMate#jumpTabStop(backwards)
     if g:snipmate_snipCurPos < 0 | let g:snipmate_snipCurPos = s:snipLen - 1 | endif
 
     if g:snipmate_snipCurPos == s:snipLen
-        let sMode = g:snipmate_endCol == g:snipmate_snipPos[g:snipmate_snipCurPos-1][1]+g:snipmate_snipPos[g:snipmate_snipCurPos-1][2]
+        "let sMode = g:snipmate_endCol == g:snipmate_snipPos[g:snipmate_snipCurPos-1][1]+g:snipmate_snipPos[g:snipmate_snipCurPos-1][2]
         call snipMate#removeSnippet()
-        return sMode ? "\<tab>" : TriggerSnippet()
+        "return sMode ? "\<tab>" : TriggerSnippet()
+        " hit the end of tabstop list, better to quit
+        return "\<tab>"
     endif
 
     call cursor(g:snipmate_snipPos[g:snipmate_snipCurPos][0], g:snipmate_snipPos[g:snipmate_snipCurPos][1])
