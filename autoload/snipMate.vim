@@ -170,13 +170,13 @@ fun s:ProcessSnippet(snip)
     endif
 
     " Place all text after a colon in a tab stop after the tab stop
-    " (e.g. "${#:foo}" becomes "${:foo}foo").
+    " (e.g. "${#:foo}" becomes "${#:foo}foo").
     " This helps tell the position of the tab stops later.
     let snippet = substitute(snippet, '${\d\+:\(.\{-}\)}', '&\1', 'g')
 
     " Update the a:snip so that all the $# become the text after
     " the colon in their associated ${#}.
-    " (e.g. "${1:foo}" turns all "$1"'s into "foo")
+    " (e.g. "${1:foo}" turns all "$1"'s into "foo$1")
     let i = 1
     while stridx(snippet, '${'.i) != -1
         let s = matchstr(snippet, '${'.i.':\zs.\{-}\ze}')
@@ -234,7 +234,13 @@ fun s:BuildTabStops(snip, lnum, col, indent)
 
         let snipPos[j][0] = a:lnum + s:Count(beforeTabStop, "\n")
         let snipPos[j][1] = a:indent + len(matchstr(withoutOthers, '.*\(\n\|^\)\zs.*\ze${'.i.'\D'))
-        let snipPos[j][3] = matchstr(beforeWithoutOthers, '\S\+$')
+        if j==0 && snipPos[j][0] == a:lnum && snipPos[j][1] == a:indent
+            let target_line = getline(a:lnum)
+            let before_chars = strpart(target_line, 0, a:col)
+            let snipPos[j][3] = matchstr(before_chars, '\S\+$')
+        else
+            let snipPos[j][3] = matchstr(beforeWithoutOthers, '\S\+$')
+        endif
         if snipPos[j][0] == a:lnum | let snipPos[j][1] += a:col | endif
 
         " Get all $# matches in another list, if ${#:name} is given
