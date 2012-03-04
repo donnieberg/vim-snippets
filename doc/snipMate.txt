@@ -287,7 +287,10 @@ Perhaps some of these features will be added in a later release.
 ==============================================================================
 CONTACT                                   *snipMate-contact* *snipMate-author*
 
-To contact the author (Michael Sanders), please email:
+To contact the developer (Yuwei Yu), please email:
+ acevery <at> gmail <dot> com
+
+To contact the original author (Michael Sanders), please email:
  msanders42+snipmate <at> gmail <dot> com
 
 I greatly appreciate any suggestions or improvements offered for the script.
@@ -297,6 +300,7 @@ LICENSE                                                     *snipMate-license*
 
 snipMate is released under the MIT license:
 
+Copyright 2012 Yuwei Yu. All rights reserved.
 Copyright 2009-2010 Michael Sanders. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
