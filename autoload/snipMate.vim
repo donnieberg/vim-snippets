@@ -512,8 +512,8 @@ fun s:UpdateChangedSnip(entering)
         "endif
         " Delete snippet if cursor moves out of snippet
         if lnum < g:snipmate_snipStart[0] || lnum > g:snipmate_snipEnd[0]
-                \ || (lnum == g:snipmate_snipStart[0] && col <= g:snipmate_snipStart[1] )
-                \ || (lnum == g:snipmate_snipEnd[0] && col >= g:snipmate_snipEnd[1])
+                \ || (lnum == g:snipmate_snipStart[0] && col < g:snipmate_snipStart[1] )
+                \ || (lnum == g:snipmate_snipEnd[0] && col > g:snipmate_snipEnd[1])
             call snipMate#removeSnippet()
         endif
     endif
