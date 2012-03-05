@@ -49,7 +49,7 @@ endf
 
 fun snipMate#removeSnippet()
     unl! g:snipmate_snipPos g:snipmate_snipCurPos s:snipLen g:snipmate_endCol g:snipmate_endLine s:prevLen
-         \ s:lastBuf s:oldWord
+         \ s:lastBuf s:oldWord g:snipmate_snipStart g:snipmate_snipEnd
     if exists('g:snipmate_snipUpdate')
         unl s:startCol s:origWordLen g:snipmate_snipUpdate
         if exists('s:oldVars') | unl s:oldVars s:oldEndCol | endif
@@ -110,6 +110,10 @@ fun snipMate#expandSnip(snip, col)
             let addedCols += indent - 1
         endif
         let g:snipmate_endCol += addedCols
+        if lnum == g:snipmate_snipEnd[0]
+            let g:snipmate_snipEnd[1] += addedCols
+        endif
+        let g:snipmate_snipEnd[0] += addedLines
         call s:UpdateTabStops()
         call remove(g:snipmate_snipPos, g:snipmate_snipCurPos)
     endif
@@ -218,6 +222,9 @@ fun s:BuildTabStops(snip, lnum, col, indent)
     let snipPos = []
     let i = 1
     let withoutVars = substitute(a:snip, '$\d\+', '', 'g')
+    if !exists('g:snipmate_snipStart')
+        let g:snipmate_snipStart = [a:lnum, a:col + a:indent]
+    endif
     while stridx(a:snip, '${'.i) != -1
         let beforeTabStop = matchstr(withoutVars, '^.*\ze${'.i.'\D')
         let withoutOthers = substitute(withoutVars, '${\('.i.'\D\)\@!\d\+.\{-}}', '', 'g')
@@ -262,6 +269,18 @@ fun s:BuildTabStops(snip, lnum, col, indent)
         endif
         let i += 1
     endw
+    if !exists('g:snipmate_snipEnd')
+        let withoutAllVars = substitute(withoutVars, '${\d\+.\{-}}', '', 'g')
+        let g:snipmate_snipEnd = [0, 0]
+        let g:snipmate_snipEnd[0] = a:lnum + s:Count(withoutAllVars, "\n")
+        let l:snipLines = split(withoutAllVars,'\n')
+        if len(l:snipLines) > 0
+            let g:snipmate_snipEnd[1] = a:col + a:indent + len(l:snipLines[-1])
+        else
+            let g:snipmate_snipEnd[1] = a:col + a:indent
+        endif
+    endif
+
     return [snipPos, i - 1]
 endf
 
@@ -465,23 +484,37 @@ fun s:UpdateChangedSnip(entering)
         let lnum = line('.')
         let changeLine = line('$') - s:prevLen[0]
 
-        if lnum == g:snipmate_endLine
-            let g:snipmate_endCol += col('$') - s:prevLen[1]
-            let s:prevLen = [line('$'), col('$')]
-        endif
         if changeLine != 0
             let g:snipmate_endLine += changeLine
             let g:snipmate_endCol = col
+            let g:snipmate_snipEnd[0] += changeLine
+            if lnum == g:snipmate_snipEnd[0]
+                let g:snipmate_snipEnd[1] += col('$') - s:prevLen[1]
+            endif
             let s:prevLen = [line('$'), col('$')]
+        else
+            if lnum == g:snipmate_snipEnd[0]
+                let g:snipmate_snipEnd[1] += col('$') - s:prevLen[1]
+            endif
+            if lnum == g:snipmate_endLine
+                let g:snipmate_endCol += col('$') - s:prevLen[1]
+                let s:prevLen = [line('$'), col('$')]
+            endif
         endif
 
         " Delete snippet if cursor moves out of it in insert mode in the last
         " tabstop
-        if g:snipmate_snipCurPos == s:snipLen -1
-            if (lnum == g:snipmate_endLine && (col > g:snipmate_endCol || col < g:snipmate_snipPos[g:snipmate_snipCurPos][1]))
-                \ || lnum > g:snipmate_endLine || lnum < g:snipmate_snipPos[g:snipmate_snipCurPos][0]
-                call snipMate#removeSnippet()
-            endif
+        "if g:snipmate_snipCurPos == s:snipLen -1
+        "    if (lnum == g:snipmate_endLine && (col > g:snipmate_endCol || col < g:snipmate_snipPos[g:snipmate_snipCurPos][1]))
+        "        \ || lnum > g:snipmate_endLine || lnum < g:snipmate_snipPos[g:snipmate_snipCurPos][0]
+        "        call snipMate#removeSnippet()
+        "    endif
+        "endif
+        " Delete snippet if cursor moves out of snippet
+        if lnum < g:snipmate_snipStart[0] || lnum > g:snipmate_snipEnd[0]
+                \ || (lnum == g:snipmate_snipStart[0] && col <= g:snipmate_snipStart[1] )
+                \ || (lnum == g:snipmate_snipEnd[0] && col >= g:snipmate_snipEnd[1])
+            call snipMate#removeSnippet()
         endif
     endif
 endf

@@ -196,6 +196,7 @@ fun! TriggerSnippet()
                 sil exe 's/\V'.escape(trigger, '/\.').'\%#//'
                 if exists('g:snipmate_endCol')
                     let g:snipmate_endCol -= len(trigger)
+                    let g:snipmate_snipEnd[1] -= len(trigger)
                 endif
                 return snipMate#expandSnip(snippet, col)
             endif
