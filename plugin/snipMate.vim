@@ -243,8 +243,14 @@ fun s:GetSnippet(word, scope)
             let snippet = s:ChooseSnippet(a:scope, word)
             if snippet == '' | break | endif
         else
-            if match(word, '\W') == -1 | break | endif
-            let word = substitute(word, '.\{-}\W', '', '')
+            let awidx = match(word, '\W')
+            if awidx == -1
+                break
+            elseif awidx + 1 == len(word) && awidx != 0
+                let word = strpart(word, awidx)
+            else
+                let word = substitute(word, '.\{-}\W', '', '')
+            endif
         endif
     endw
     if word == '' && a:word != '.' && stridx(a:word, '.') != -1
