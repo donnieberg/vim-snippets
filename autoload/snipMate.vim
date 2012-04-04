@@ -157,6 +157,40 @@ fun snipMate#expandSnip(snip, col)
     return ''
 endf
 
+" find the matching curl
+fun s:MatchingCurl(string, theI)
+    let counter = 1
+    let indexOfI = stridx(a:string, '${'.a:theI.':')
+    if indexOfI == -1
+        return []
+    endif
+
+    let theMatch = match(a:string, '{\|}', indexOfI + 2)
+    while theMatch != -1
+        let thestr = strpart(a:string, theMatch, 1)
+        if thestr == '{'
+            let counter += 1
+        else
+            let counter -= 1
+        endif
+        if counter == 0
+            break
+        endif
+        let theMatch = match(a:string, '{\|}', theMatch + 1)
+    endw
+    if counter == 0
+        return [indexOfI, theMatch]
+    else
+        return []
+    endif
+endf
+
+" We now need to find the snippets hierarchy, and recursive algorithm, and
+" return a list of [start, end, hierarchy, parent]
+fun GetHierarchy(snip, hierarchy, parent)
+    let startPos = match(snip, '${')
+endf
+
 " Prepare snippet to be processed by s:BuildTabStops
 fun s:ProcessSnippet(snip)
     let snippet = a:snip
@@ -492,6 +526,8 @@ fun s:UpdateChangedSnip(entering)
                 let g:snipmate_snipEnd[1] += col('$') - s:prevLen[1]
             endif
             let s:prevLen = [line('$'), col('$')]
+            " we remove the before preceeding words in current tabstop
+            let g:snipmate_snipPos[g:snipmate_snipCurPos][3] = ''
         else
             if lnum == g:snipmate_snipEnd[0]
                 let g:snipmate_snipEnd[1] += col('$') - s:prevLen[1]
@@ -504,12 +540,13 @@ fun s:UpdateChangedSnip(entering)
 
         " Delete snippet if cursor moves out of it in insert mode in the last
         " tabstop
-        "if g:snipmate_snipCurPos == s:snipLen -1
-        "    if (lnum == g:snipmate_endLine && (col > g:snipmate_endCol || col < g:snipmate_snipPos[g:snipmate_snipCurPos][1]))
-        "        \ || lnum > g:snipmate_endLine || lnum < g:snipmate_snipPos[g:snipmate_snipCurPos][0]
-        "        call snipMate#removeSnippet()
-        "    endif
-        "endif
+        if g:snipmate_snipCurPos == s:snipLen -1
+            if (lnum == g:snipmate_endLine && (col > g:snipmate_endCol || col < g:snipmate_snipPos[g:snipmate_snipCurPos][1]))
+                \ || lnum > g:snipmate_endLine || lnum < g:snipmate_snipPos[g:snipmate_snipCurPos][0]
+                call snipMate#removeSnippet()
+                return
+            endif
+        endif
         " Delete snippet if cursor moves out of snippet
         if lnum < g:snipmate_snipStart[0] || lnum > g:snipmate_snipEnd[0]
                 \ || (lnum == g:snipmate_snipStart[0] && col < g:snipmate_snipStart[1] )
