@@ -124,9 +124,7 @@ snippet title
 	<title>${1:`substitute(Filename('', 'Page Title'), '^.', '\u&', '')`}</title>${2}
 snippet script
 	<script type="text/javascript">
-	// <![CDATA[
 		${1}
-	// ]]>
 	</script>${2}
 snippet scriptsrc
 	<script src="${1}.js"></script>${2}
@@ -263,3 +261,14 @@ snippet figure
 	</figure>
 snippet figcaption
 	<figcaption>${1}</figcaption>
+snippet html5
+	<!DOCTYPE html>
+	<html>
+	  <head>
+		  <meta charset="utf-8">
+			<title>${1}</title>
+		</head>
+		<body>
+		  ${2}
+		</body>
+	</html>

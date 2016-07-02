@@ -1,6 +1,6 @@
 # Alert
 snippet alert
-	alert("${1:message}");
+	alert('${1:message}');
 # Prototype
 snippet proto
 	${1:class_name}.prototype.${2:method_name} =
@@ -14,17 +14,29 @@ snippet fun
 	}
 # Anonymous Function
 snippet f
-	function(${1}) {${2}};
+	function(${1}) {
+		${2}
+	};${3}
+# Anonymous Function es6
+snippet 6f
+	(${1}) => {
+		${2}
+	}${3}
 # if
 snippet if
-	if (${1:true}) {${2}}
+	if (${1:true}) {
+		${2}
+	}
 # if ... else
 snippet ife
-	if (${1:true}) {${2}}
-	else{${3}}
+	if (${1:true}) {
+		${2}
+	} else {
+		${3}
+	}
 # tertiary conditional
 snippet t
-	${1:/* condition */} ? ${2:a} : ${3:b}
+	${1} ? ${2} : ${3}
 # switch
 snippet switch
 	switch(${1:expression}) {
@@ -43,8 +55,7 @@ snippet case
 	${3}
 # for (...) {...}
 snippet for
-	for (var ${2:i} = 0; $2 < ${1:Things}.length; $2${3:++}) {
-		${4:$1[$2]}
+	for (var ${1} = 0; $2 < ${2}.length; $2) {
 	};
 # for (...) {...} (Improved Native For-Loop)
 snippet forr
@@ -79,4 +90,129 @@ snippet get
 	getElementsBy${1:TagName}('${2}')${3}
 # Get Element
 snippet gett
+# ===================================
 	getElementBy${1:Id}('${2}')${3}
+# My Custom javascript snippets
+# ===================================
+snippet cl
+	console.log(${1});
+# ===================================
+# ReactJS snippets
+# ===================================
+# create react component
+snippet rc
+	/*
+	Copyright (c) 2015, salesforce.com, inc. All rights reserved.
+	Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+	Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+	*/
+
+
+	import React from 'react';
+
+	const displayName = '${1:MyComponent}';
+	const propTypes = {
+	  myPropType: React.PropTypes.string,
+	};
+	const defaultProps = {
+	  myDefaultProp: 'test',
+	};
+
+	class $1 extends React.Component {
+
+	  constructor(props) {
+	    super(props);
+	    this.state = {};
+	  }
+
+	  render(){
+	    return (
+	      <div>My Component</div>
+	    );
+	  }
+
+	}
+
+	$1.displayName = displayName;
+	$1.propTypes = propTypes;
+	$1.defaultProps = defaultProps;
+
+	module.exports = $1;
+
+# constructor props - new way of get inital state in es6/react beta
+snippet cp
+	constructor(props){
+		super(props);
+		this.state = {${1}: ${2}};
+	}
+# Set state
+snippet ss
+	this.setState({
+		${1}: ${2}
+	})
+snippet cn
+	className='${1}'${2}
+# HTML in ReactJS
+# ===================================
+snippet a
+	<a href='${1:href}'${2}>${3:$1}</a>
+snippet av
+	<a href='javascript:void(0)'${1}>${2}</a>
+snippet img
+	<img src='${1}' alt='${2}' />
+snippet span
+	<span${1}>${2}</span>${3}
+snippet div
+	<div>${2}</div>${3}
+snippet header
+	<header${1}>${2}</header>
+snippet footer
+	<footer${1}>${2}</footer>
+snippet main
+	<main${1}>${2}</main>
+snippet section
+	<section${1}>${2}</section>
+snippet article
+	<article${1}>${2}</article>
+snippet aside
+	<aside${1}>${2}</aside>
+snippet code
+	<code${1}>${2}</code>
+snippet ol
+	<ol${1}>
+		<li${2}>${3}</li>
+	</ol>${4}
+snippet ul
+	<ul${1}>
+		<li${2}>${3}</li>
+	</ul>${4}
+snippet li
+	<li${1}>${2}</li>
+# Typography
+snippet p
+	<p${1}>${2}</p>${3}
+snippet h1
+	<h1${1}>${2}</h1>
+snippet h2
+	<h2${1}>${2}</h2>
+snippet h3
+	<h3${1}>${2}</h3>
+snippet h4
+	<h4${1}>${2}</h4>
+# Forms
+snippet input
+	<input type='${1}' id='${2}' name='$2' value='${3}' placeholder='${4}' ${5}/>
+snippet label:i
+	<label for='${1}'>${2}</label>
+	<input type='${3}' id='$1' name='$1' value='${4}' placeholder='${5}' ${6}/>
+snippet label:s
+	<label for='${1}'>${2}</label>
+	<select id='$1' name='$1'>
+		<option value='${2}'>${3}</option>
+	</select>
+snippet label:t
+	<label for='${1}'>${2}</label>
+	<textarea type='${3}' id='$1' name='$1' placeholder='${4}'${5}>${6}</textarea>
